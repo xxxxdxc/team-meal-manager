@@ -1,0 +1,4 @@
+{
+  "compilerOptions": { "target": "ESNext", "module": "Preserve", "moduleResolution": "Bundler", "strict": true, "skipLibCheck": true, "noEmit": true, "types": ["bun"] },
+  "include": ["assets/runtime/src/**/*.ts"]
+}

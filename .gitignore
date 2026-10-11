@@ -1,0 +1,8 @@
+node_modules/
+assets/runtime/data/
+data/
+evidence/
+project.json
+*.dpapi
+*.sqlite*
+.env*

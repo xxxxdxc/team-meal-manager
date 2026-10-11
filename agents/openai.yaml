@@ -1,0 +1,4 @@
+interface:
+  display_name: "团餐管家"
+  short_description: "整理微信多人需求，复用团队偏好，核对整单预算并在确认后点餐"
+  default_prompt: "使用 $team-meal-manager，根据我提供的微信聊天记录为团队整理需求、生成同店配餐清单和整单报价，等付款人确认后再下单。"

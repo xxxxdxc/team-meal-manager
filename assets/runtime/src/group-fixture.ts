@@ -1,0 +1,21 @@
+import { type Brand,type GroupGateway } from './group-gateway';
+export class GroupFixture implements GroupGateway{
+  calls:{name:string;args:any}[]=[];failCreate=false;extraCents=0;
+  constructor(readonly brand:Brand){}
+  products(){return [{id:'101',title:this.brand==='luckin'?'热茉莉奶茶':'热锡兰红茶',cents:1800,containsCoffee:false,ingredients:['茶','牛奶'],temperature:'hot'},{id:'102',title:this.brand==='luckin'?'拿铁':'冰美式',cents:1600,containsCoffee:true,ingredients:['咖啡','牛奶'],temperature:this.brand==='luckin'?'hot':'cold'},{id:'103',title:'柠檬果茶',cents:1400,containsCoffee:false,ingredients:['茶','柠檬'],temperature:'cold'},{id:'104',title:this.brand==='luckin'?'热红茶奶茶':'热可可',cents:1900,containsCoffee:false,ingredients:this.brand==='luckin'?['红茶','牛奶']:['可可','牛奶'],temperature:'hot'},{id:'105',title:'高价替代饮品',cents:5000,containsCoffee:false,ingredients:['红茶','牛奶'],temperature:'hot'}];}
+  async call(name:string,args:any){this.calls.push({name,args:structuredClone(args)});const products=this.products();
+    if(name==='queryShopList')return [{deptId:123,deptName:'演示瑞幸门店',address:'模拟地点，无真实门店订单'}];
+    if(name==='query-nearby-stores')return [{storeCode:'123',storeName:'演示麦当劳门店',address:'模拟地点，无真实门店订单',businessStatus:true}];
+    if(name==='searchProductForMcp')return products.map(p=>({productId:Number(p.id),productName:p.title,skuCode:'SKU-'+p.id+'-HOT',estimatePrice:p.cents/100,containsCoffee:p.containsCoffee,ingredients:p.ingredients,factSource:'fixture_recipe'}));
+    if(name==='query-meals')return {categories:[{name:'饮品',meals:products.map(p=>({code:p.id}))}],meals:Object.fromEntries(products.map(p=>[p.id,{name:p.title,currentPrice:String(p.cents/100),containsCoffee:p.containsCoffee,ingredients:p.ingredients,factSource:'fixture_recipe'}]))};
+    if(name==='queryProductDetailInfo'||name==='switchProduct'){const p=products.find(p=>p.id===String(args.productId))!;if(!p)throw new Error('missing product');const ice=name==='switchProduct'&&args.attrOperationParam.subAttr.attributeId===2;return {productId:Number(p.id),productName:p.title,skuCode:'SKU-'+p.id+(ice?'-ICE':'-HOT'),estimatePrice:p.cents/100,containsCoffee:p.containsCoffee,ingredients:p.ingredients,factSource:'fixture_recipe',productAttrs:[{attributeId:1,attributeName:'温度',productSubAttrs:[{attributeId:1,attributeName:'热',canSelected:1,selected:!ice},{attributeId:2,attributeName:'冰',canSelected:1,selected:ice}]}]};}
+    if(name==='query-meal-detail'){const p=products.find(p=>p.id===args.code)!;return {code:p.id,name:p.title,containsCoffee:p.containsCoffee,ingredients:p.ingredients,temperature:p.temperature,factSource:'fixture_recipe',rounds:[],modification:{items:[{minValues:0,maxValues:1,values:[{code:'milk',name:'加奶',minQuantity:0,maxQuantity:1,selectedQuantity:0,selectedKey:'1',unselectedKey:'0'}]}]}};}
+    if(name==='previewOrder'){const total=args.productList.reduce((n:number,i:any)=>n+products.find(p=>p.id===String(i.productId))!.cents*i.amount,0)-500+this.extraCents;return {discountPrice:total/100,couponCodeList:['FIXTURE-COUPON'],productInfoList:args.productList.map((i:any)=>({productId:i.productId,skuCode:i.skuCode,amount:i.amount,additionDesc:i.skuCode.endsWith('HOT')?'热':'冰'}))};}
+    if(name==='calculate-price'){const productList=args.items.map((i:any)=>{const p=products.find(p=>p.id===i.productCode)!;return {productCode:p.id,productName:p.title,quantity:i.quantity,subtotal:p.cents*i.quantity};});return {price:productList.reduce((n:number,p:any)=>n+p.subtotal,0)-500+this.extraCents,productList,takeWayList:[{code:'eat-in',title:'堂食'},{code:'take-in-store',title:'外带'}]};}
+    if(name==='createOrder'||name==='create-order'){if(this.failCreate)throw new Error('simulated timeout');const id='DEMO-'+this.brand+'-'+crypto.randomUUID();return name==='createOrder'?{orderIdStr:id,needPay:true,payOrderUrl:'https://example.com/fixture-payment'}:{orderId:id,payH5Url:'https://example.com/fixture-payment',orderDetail:{orderStatus:'待支付（模拟）'}};}
+    if(name==='queryOrderDetailInfo')return {orderStatus:60,orderStatusName:'等待取餐（模拟）',takeMealCodeInfo:{code:'DEMO-1234'}};
+    if(name==='query-order')return {orderStatus:'等待取餐（模拟）',pickupCode:'DEMO-1234'};
+    throw new Error('unexpected fixture tool '+name);
+  }
+  async close(){}
+}
