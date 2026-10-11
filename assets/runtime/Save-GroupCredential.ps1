@@ -1,6 +1,6 @@
 param([Parameter(Mandatory=$true)][ValidateSet('luckin','mcd')][string]$Brand)
 $ErrorActionPreference='Stop'
-Import-Module "$env:WINDIR\System32\WindowsPowerShell\v1.0\Modules\Microsoft.PowerShell.Security" -ErrorAction Stop
+if(-not(Get-Command ConvertFrom-SecureString -ErrorAction SilentlyContinue)){Import-Module Microsoft.PowerShell.Security -ErrorAction Stop}
 $target=Join-Path $PSScriptRoot "data\$Brand-token.dpapi"
 New-Item -ItemType Directory -Force -Path (Split-Path $target) | Out-Null
 $secure=Read-Host "Enter $Brand bearer token (without Bearer prefix)" -AsSecureString

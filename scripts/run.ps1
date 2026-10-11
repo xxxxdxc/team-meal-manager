@@ -1,8 +1,8 @@
 param(
   [Parameter(Mandatory=$true,Position=0)]
-  [ValidateSet('doctor','init','show','profiles','profile-save','shops','select-store','confirm-roster','menu','detail','plan','quote','unavailable','replace','approve','submit','status','demo')][string]$Command,
+  [ValidateSet('pick-store','places','doctor','init','show','profiles','profile-save','shops','select-store','confirm-roster','menu','detail','plan','quote','unavailable','replace','approve','submit','status','demo')][string]$Command,
   [string]$Task,[string]$InputFile,[string]$Query,[string]$Product,[string]$Team,[string]$Brand,[string]$TakeWay,
-  [string]$ProjectRoot=$env:TEAM_MEAL_PROJECT,[switch]$Connect
+  [string]$ProjectRoot=$env:TEAM_MEAL_PROJECT,[switch]$Connect,[switch]$NoOpen
 )
 $ErrorActionPreference='Stop'
 if(-not $ProjectRoot){
@@ -24,6 +24,7 @@ if($Product){$cliArgs+=@('--product',$Product)}
 if($Team){$cliArgs+=@('--team',$Team)}
 if($Brand){$cliArgs+=@('--brand',$Brand)}
 if($TakeWay){$cliArgs+=@('--take-way',$TakeWay)}
+if($NoOpen){$cliArgs+=@('--open','false')}
 if($Connect){$cliArgs+=@('--connect','true')}
 & $bun @cliArgs
 exit $LASTEXITCODE

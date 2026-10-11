@@ -7,7 +7,7 @@
 |`SKILL.md`|告诉 Codex 何时使用、如何理解需求、何时停止和如何取得真实购买授权|
 |`agents/openai.yaml`|skill 在 Codex 中的名称、描述和默认提示|
 |`references/commands.md`|命令、JSON 输入结构、金额单位、真实与模拟模式|
-|`scripts/run.ps1`|定位 独立团餐管家项目和 Bun，将命令转交团餐 CLI|
+|`scripts/run.ps1`|定位独立运行目录和 Bun，将命令转交团餐 CLI|
 |`assets/runtime/src/group-cli.ts`|命令入口，读取 JSON、打开任务数据库并选择品牌适配器|
 |`group-types.ts`|任务、人员、规格、报价、确认等数据结构和输入校验|
 |`group-store.ts`|SQLite 任务和已确认偏好、版本号、提交记录|
@@ -15,6 +15,9 @@
 |`group-catalog.ts`|将品牌菜单和整单动作映射为 OCP manifest/query/resolve 接口|
 |`group-provider.ts`|品牌规格映射、同 SKU 合并、整篮报价、创建和查询订单|
 |`group-gateway.ts`|连接瑞幸或麦当劳 MCP，限制开放工具，读取本机加密凭证|
+|`store-discovery.ts`|品牌门店投影为OCP目录，提供manifest/query/resolve和快照分页|
+|`location.ts`、`location-session.ts`|位置来源、坐标转换、本机命名地点和临时选店会话|
+|`assets/runtime/public/location.html`|浏览器授权定位、展示门店和明确选择；不创建订单|
 |`group-fixture.ts`、`group-demo.ts`、`group.test.ts`|不调用真实商家的模拟数据、演示与回归测试|
 |`assets/runtime/`|独立运行所需的业务源码、测试和凭证配置脚本|
 
@@ -27,7 +30,9 @@ flowchart TD
   A[组织者提供微信截图或聊天文字] --> B[Codex 提取名单与本次需求]
   B --> C[一次列出缺失和冲突，取得确认]
   C --> D[init / confirm-roster]
-  D --> E[shops / select-store]
+  D --> U[浏览器授权定位或选择命名地点]
+  U --> V[高德坐标转换和地址解析]
+  V --> E[OCP门店查询与resolve，用户选择门店]
   E --> F[OCP manifest 与 query 查询菜单]
   F --> G[OCP resolve 查询详情与规格]
   G --> H[plan 建立人员与商品映射]

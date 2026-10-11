@@ -41,6 +41,12 @@ $runner=(Join-Path $env:USERPROFILE '.codex\skills\team-meal-manager\scripts\run
 
 ## 门店、菜单、规格
 
+`pick-store -Task ID`：启动临时浏览器定位选店页，用户授权当前位置、使用常用地点或手动位置，然后明确选店。默认打开系统浏览器，`-NoOpen` 仅输出链接供手动打开。命令在 stderr 输出 location_url 并等待，在 stdout 输出最终选店 JSON；客户端应保持后台命令运行，不能误把链接当作选店完成。会话10分钟有效，取消和超时都不下单。细节见 [clients.md](clients.md)。
+
+`places`：查询用户明确保存的本机命名地点。保存和删除通过定位页的确认按钮完成，不从聊天中自动推断保存授权。
+
+查店与选店均经过 OCP manifest/query/resolve，品牌 MCP 限于 provider/gateway 适配层。门店目录绑定本次授权查询位置，使用 `team.store.location.v1` 查询包，遵守官方每页50项上限并支持目录快照 cursor，不向官方 filters 塞自定义经纬度字段。
+
 `shops -Task ID -InputFile FILE`：瑞幸输入 `{longitude,latitude,keyword?}`；麦当劳输入 `{city,keyword}`。坐标/城市来自组织者指定，不能用演示地点替代实际地点。
 
 `select-store` 输入 `{expected_revision,shop_id,location:{上述地点参数}}`，重新核验所选店在查询结果中。展示店名和地址让组织者选择。换店会清空配餐和旧报价。

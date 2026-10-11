@@ -6,3 +6,4 @@ project.json
 *.dpapi
 *.sqlite*
 .env*
+dist/
